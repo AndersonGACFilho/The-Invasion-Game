@@ -1,0 +1,9 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(477,5): warning MSB8004: o diretório Output não termina com uma barra à direita. Essa instância de compilação adicionará a barra conforme necessário para permitir a avaliação adequada do Diretório Output.
+  The Invasion.cpp
+C:\Users\izabe\source\repos\The Invasion\The Invasion\The Invasion.cpp(879,11): warning C4101: 'k': variável local não referenciada
+  Gerando código
+  10 of 158 functions ( 6.3%) were compiled, the rest were copied from previous compilation.
+    9 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finalizada a geração de código
+  The Invasion.vcxproj -> C:\Users\izabe\source\repos\The Invasion\The Invasion\x64\Release\The Invasion.exe
