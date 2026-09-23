@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,7 +13,13 @@
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 14px; padding: 16px;
   }
+  header { display: flex; align-items: center; gap: 16px; }
   h1 { margin: 0; font-size: clamp(20px, 4vw, 30px); font-weight: 600; letter-spacing: .12em; color: #0f6; }
+  #lang {
+    background: #0a2a1a; color: #8fb; border: 1px solid #0f6a3a;
+    border-radius: 4px; padding: 3px 9px; font: inherit; font-size: 12px; cursor: pointer;
+  }
+  #lang:hover { background: #10402a; }
   #frame { position: relative; width: 100%; max-width: 1280px; aspect-ratio: 16 / 9; }
   canvas {
     display: block; width: 100%; height: 100%; background: #000;
@@ -26,32 +32,90 @@
   }
   #status[hidden] { display: none; }
   progress { width: min(340px, 70%); height: 6px; accent-color: #0f6; }
-  #hint { font-size: 12px; color: #4a7; text-align: center; max-width: 640px; line-height: 1.6; }
+  #hint { font-size: 12px; color: #4a7; text-align: center; max-width: 640px; line-height: 1.6; margin: 0; }
   kbd { background: #0a2a1a; border: 1px solid #0f6a3a; border-radius: 3px; padding: 1px 5px; color: #8fb; }
 </style>
 </head>
 <body>
-  <h1>THE INVASION</h1>
+  <header>
+    <h1>THE INVASION</h1>
+    <button id="lang" type="button"></button>
+  </header>
+
   <div id="frame">
     <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
     <div id="status">
-      <div id="status-text">carregando…</div>
+      <div id="status-text"></div>
       <progress id="bar" value="0" max="100"></progress>
     </div>
   </div>
-  <p id="hint">
-    <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> mover ·
-    <kbd>Espaço</kbd> atirar · <kbd>Esc</kbd> menu<br>
-    Clique no quadro para dar foco. O som só começa após a primeira tecla —
-    é a política de autoplay do navegador, não um defeito do jogo.
-  </p>
+
+  <p id="hint"></p>
 
 <script>
+  // --- i18n -------------------------------------------------------------
+  // The embedding page passes ?lang=; a visitor opening the build directly
+  // gets their browser's language. The choice is remembered per browser.
+  const STRINGS = {
+    en: {
+      switchTo: 'Português',
+      loading: 'loading…',
+      failed: 'failed — check the console',
+      move: 'move', fire: 'fire', menu: 'menu',
+      focus: 'Click the frame to give it focus.',
+      audio: 'Sound starts on the first key press — that is the browser autoplay policy, not a fault in the game.',
+    },
+    pt: {
+      switchTo: 'English',
+      loading: 'carregando…',
+      failed: 'falhou — veja o console',
+      move: 'mover', fire: 'atirar', menu: 'menu',
+      focus: 'Clique no quadro para dar foco.',
+      audio: 'O som começa na primeira tecla — é a política de autoplay do navegador, não um defeito do jogo.',
+    },
+  };
+
+  const SPACE = { en: 'Space', pt: 'Espaço' };
+
+  function resolveLang() {
+    const fromQuery = new URLSearchParams(location.search).get('lang');
+    if (fromQuery && STRINGS[fromQuery]) return fromQuery;
+    try {
+      const saved = localStorage.getItem('invasion-lang');
+      if (saved && STRINGS[saved]) return saved;
+    } catch (_) { /* private mode */ }
+    return (navigator.language || 'en').toLowerCase().startsWith('pt') ? 'pt' : 'en';
+  }
+
+  let lang = resolveLang();
+
+  function render() {
+    const s = STRINGS[lang];
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.getElementById('lang').textContent = s.switchTo;
+    document.getElementById('hint').innerHTML =
+      `<kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> ${s.move} ·
+       <kbd>${SPACE[lang]}</kbd> ${s.fire} · <kbd>Esc</kbd> ${s.menu}<br>
+       ${s.focus} ${s.audio}`;
+    const statusText = document.getElementById('status-text');
+    if (!statusEl.hidden && statusText.dataset.key) {
+      statusText.textContent = s[statusText.dataset.key] ?? statusText.textContent;
+    }
+  }
+
   const statusEl = document.getElementById('status');
   const statusText = document.getElementById('status-text');
   const bar = document.getElementById('bar');
   const canvas = document.getElementById('canvas');
 
+  document.getElementById('lang').addEventListener('click', () => {
+    lang = lang === 'pt' ? 'en' : 'pt';
+    try { localStorage.setItem('invasion-lang', lang); } catch (_) { /* private mode */ }
+    render();
+    canvas.focus();
+  });
+
+  // --- emscripten module ------------------------------------------------
   var Module = {
     canvas: canvas,
     print: (...a) => console.log(...a),
@@ -60,13 +124,27 @@
       if (!text) { statusEl.hidden = true; canvas.focus(); return; }
       statusEl.hidden = false;
       const m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-      if (m) { statusText.textContent = m[1]; bar.value = +m[2]; bar.max = +m[4]; }
-      else { statusText.textContent = text; bar.removeAttribute('value'); }
+      if (m) {
+        statusText.dataset.key = '';
+        statusText.textContent = m[1];
+        bar.value = +m[2];
+        bar.max = +m[4];
+      } else {
+        statusText.dataset.key = 'loading';
+        statusText.textContent = STRINGS[lang].loading;
+        bar.removeAttribute('value');
+      }
     },
-    onRuntimeInitialized: () => canvas.focus()
+    onRuntimeInitialized: () => canvas.focus(),
   };
-  Module.setStatus('carregando…');
-  window.onerror = () => Module.setStatus('falhou — veja o console');
+
+  render();
+  Module.setStatus(STRINGS[lang].loading);
+  window.onerror = () => {
+    statusText.dataset.key = 'failed';
+    statusText.textContent = STRINGS[lang].failed;
+    statusEl.hidden = false;
+  };
   canvas.addEventListener('click', () => canvas.focus());
 </script>
 {{{ SCRIPT }}}
