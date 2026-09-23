@@ -33,6 +33,17 @@
   #status[hidden] { display: none; }
   progress { width: min(340px, 70%); height: 6px; accent-color: #0f6; }
   #hint { font-size: 12px; color: #4a7; text-align: center; max-width: 640px; line-height: 1.6; margin: 0; }
+
+  /* Embedded in the site, the page around this one already shows the
+     title, the controls and its own frame. Ours would be a second set of
+     chrome inside a fixed-height iframe, which is what pushes the canvas
+     out of view and brings up scrollbars. */
+  body.embedded { padding: 0; gap: 0; justify-content: stretch; overflow: hidden; }
+  body.embedded header,
+  body.embedded #hint { display: none; }
+  body.embedded #frame { max-width: none; height: 100%; aspect-ratio: auto; flex: 1; }
+  body.embedded canvas { border: 0; border-radius: 0; }
+  body.embedded #status { border-radius: 0; }
   kbd { background: #0a2a1a; border: 1px solid #0f6a3a; border-radius: 3px; padding: 1px 5px; color: #8fb; }
 </style>
 </head>
@@ -88,6 +99,11 @@
   }
 
   let lang = resolveLang();
+
+  // Same-origin check is unnecessary: any framing at all means the host
+  // page is providing the chrome.
+  const embedded = window.self !== window.top;
+  if (embedded) document.body.classList.add('embedded');
 
   function render() {
     const s = STRINGS[lang];
