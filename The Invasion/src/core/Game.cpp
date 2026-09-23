@@ -1,5 +1,6 @@
 #include "core/Game.h"
 #include "core/Config.h"
+#include "platform/Paths.h"
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -64,6 +65,15 @@ void Game::switchTo(SceneId id)
 
 int Game::run()
 {
+    // Installed builds keep their assets under a fixed prefix; the loaders
+    // below all use paths relative to the working directory.
+    if (!Paths::enterDataDir())
+    {
+        std::fprintf(stderr, "ERROR: could not enter data directory %s\n",
+                     Paths::dataDir());
+        return EXIT_FAILURE;
+    }
+
     if (!m_platform.boot(Config::ScreenWidth, Config::ScreenHeight,
                          Config::Fps, "The Invasion"))
         return EXIT_FAILURE;
@@ -103,12 +113,17 @@ int Game::run()
         m_current->handleEvent(event);
 
         if (event.type == ALLEGRO_EVENT_TIMER)
+        {
             m_current->update();
+            m_current->markDirty();
+        }
 
         if (m_current->wantsDraw(al_is_event_queue_empty(queue)))
         {
+            m_platform.beginFrame();
             m_current->draw();
             m_platform.present();
+            m_current->clearDirty();
         }
 
         const SceneId next = m_current->nextScene();

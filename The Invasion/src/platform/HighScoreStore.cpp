@@ -1,17 +1,16 @@
 #include "platform/HighScoreStore.h"
+#include "platform/Paths.h"
+
 #include <fstream>
+#include <string>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
-const char* HighScoreStore::path()
+std::string HighScoreStore::path()
 {
-#ifdef __EMSCRIPTEN__
-    return "/save/HighScore";
-#else
-    return "HighScore";
-#endif
+    return Paths::highScoreFile();
 }
 
 void HighScoreStore::init()
@@ -33,7 +32,7 @@ void HighScoreStore::init()
 int HighScoreStore::load()
 {
     int value = 0;
-    std::ifstream in(path(), std::ios::binary);
+    std::ifstream in(path().c_str(), std::ios::binary);
     if (in)
         in >> value;
     return value;
@@ -42,7 +41,7 @@ int HighScoreStore::load()
 void HighScoreStore::save(int value)
 {
     {
-        std::ofstream out(path(), std::ios::binary);
+        std::ofstream out(path().c_str(), std::ios::binary);
         out << value;
     }
 

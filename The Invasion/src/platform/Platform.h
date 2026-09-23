@@ -30,7 +30,17 @@ public:
 
     void startClock() { al_start_timer(m_timer); }
 
-    /// Shows the finished frame and clears the buffer for the next one.
+    /// Clears the drawing buffer. Must precede the frame's drawing.
+    void beginFrame();
+
+    /**
+     * @brief Presents the finished frame.
+     *
+     * Clearing happens in @ref beginFrame rather than here. WebGL has no
+     * true double buffer: the browser composites whatever the drawing
+     * buffer holds at its next repaint, so clearing straight after the
+     * flip -- as the original did -- presents an empty frame.
+     */
     void present();
 
 private:

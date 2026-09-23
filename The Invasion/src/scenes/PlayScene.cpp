@@ -21,7 +21,6 @@ void PlayScene::onEnter()
     // twenty frames of every match.
     m_frame = 0;
     m_frameCount = 0;
-    m_dirty = true;
 
     m_context.audio.playBattleMusic();
 }
@@ -86,7 +85,6 @@ void PlayScene::advanceAnimation()
 
 void PlayScene::update()
 {
-    m_dirty = true;
     advanceAnimation();
 
     m_context.starfield.update();
@@ -114,6 +112,4 @@ void PlayScene::draw()
     m_playerWeapon.draw(m_player);
     m_enemyWeapon.draw(m_fleet);
     m_hud.draw(m_player, m_playerWeapon, m_fleet, resources);
-
-    m_dirty = false;
 }

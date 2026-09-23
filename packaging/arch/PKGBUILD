@@ -1,0 +1,46 @@
+# Maintainer: Anderson Gonçalves <andersonfilho09@gmail.com>
+pkgname=the-invasion-git
+_pkgname=the-invasion
+pkgver=r1
+pkgrel=1
+pkgdesc='Classic arcade space shooter written in C++ with Allegro 5'
+arch=('x86_64' 'aarch64')
+url='https://github.com/AndersonGACFilho/The-Invasion-Game'
+license=('MIT')
+depends=('allegro')
+makedepends=('cmake' 'git')
+provides=("${_pkgname}")
+conflicts=("${_pkgname}")
+source=("${_pkgname}::git+https://github.com/AndersonGACFilho/The-Invasion-Game.git")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "${srcdir}/${_pkgname}"
+    printf 'r%s.%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+    # THE_INVASION_DATADIR switches the game into installed mode: it enters
+    # that directory on start-up and keeps its save file under XDG instead,
+    # since /usr/share is not writable.
+    cmake -S "${srcdir}/${_pkgname}/The Invasion" -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DTHE_INVASION_DATADIR="/usr/share/${_pkgname}"
+    cmake --build build
+}
+
+package() {
+    DESTDIR="${pkgdir}" cmake --install build
+
+    install -Dm644 "${srcdir}/${_pkgname}/LICENSE" \
+        "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+    install -Dm644 "${srcdir}/${_pkgname}/README.md" \
+        "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+    install -Dm644 "${srcdir}/${_pkgname}/packaging/arch/${_pkgname}.desktop" \
+        "${pkgdir}/usr/share/applications/${_pkgname}.desktop"
+
+    # CMake installs the binary as the_invasion; the command users type,
+    # the .desktop Exec line and the package name all use hyphens.
+    mv "${pkgdir}/usr/bin/the_invasion" "${pkgdir}/usr/bin/${_pkgname}"
+}

@@ -28,15 +28,19 @@ public:
     /**
      * @brief Decides whether this screen draws on the current iteration.
      *
-     * Menu, credits and game over redraw on every pass, which is what sets
-     * the cadence of their blinking prompt. Only the match waits for the
-     * event queue to drain.
+     * A screen draws once per clock tick, and only once the input backlog
+     * has drained. The original redrew the menu, credits and game over on
+     * every pass of their loops; on a WebGL canvas that issues several
+     * buffer swaps per browser repaint and the picture flickers.
      */
     virtual bool wantsDraw(bool queueEmpty) const
     {
-        (void)queueEmpty;
-        return true;
+        return queueEmpty && m_dirty;
     }
+
+    /// Marks the screen as needing a redraw. Called on each clock tick.
+    void markDirty() { m_dirty = true; }
+    void clearDirty() { m_dirty = false; }
 
     /// @return The requested next screen, or SceneId::None to stay put.
     SceneId nextScene() const { return m_next; }
@@ -47,4 +51,5 @@ protected:
 
 private:
     SceneId m_next = SceneId::None;
+    bool m_dirty = true;
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 /**
  * @brief Persists the all-time best score.
@@ -22,5 +23,5 @@ public:
     void save(int value);
 
 private:
-    static const char* path();
+    static std::string path();
 };

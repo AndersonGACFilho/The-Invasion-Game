@@ -26,10 +26,9 @@ bool AudioDirector::attach(const ResourceLibrary& resources)
     al_set_sample_instance_playmode(m_menu, ALLEGRO_PLAYMODE_LOOP);
     al_set_sample_instance_playmode(m_beep, ALLEGRO_PLAYMODE_ONCE);
 
-    // Original mix: the tracks sit far below the interface beep.
-    al_set_sample_instance_gain(m_menu, 0.01f);
-    al_set_sample_instance_gain(m_battle, 0.008f);
-    al_set_sample_instance_gain(m_beep, 1.0f);
+    al_set_sample_instance_gain(m_menu, MenuMusicGain);
+    al_set_sample_instance_gain(m_battle, BattleMusicGain);
+    al_set_sample_instance_gain(m_beep, BeepGain);
 
     return true;
 }

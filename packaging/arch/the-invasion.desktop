@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=The Invasion
+Comment=Classic arcade space shooter
+Exec=the-invasion
+Icon=the-invasion
+Terminal=false
+Categories=Game;ArcadeGame;ActionGame;
+Keywords=arcade;shooter;space;

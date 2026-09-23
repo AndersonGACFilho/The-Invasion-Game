@@ -59,8 +59,12 @@ bool Platform::boot(int width, int height, int fps, const char* title)
     return true;
 }
 
+void Platform::beginFrame()
+{
+    al_clear_to_color(al_map_rgb(2, 2, 10));
+}
+
 void Platform::present()
 {
     al_flip_display();
-    al_clear_to_color(al_map_rgb(2, 2, 10));
 }

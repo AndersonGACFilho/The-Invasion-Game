@@ -21,12 +21,6 @@ public:
     void update() override;
     void draw() override;
 
-    /// The match renders only once the input backlog has drained.
-    bool wantsDraw(bool queueEmpty) const override
-    {
-        return queueEmpty && m_dirty;
-    }
-
     /// Score reached when the match ended, read by @ref GameOverScene.
     int finalScore() const { return m_player.score(); }
 
@@ -44,9 +38,6 @@ private:
     Hud m_hud;
 
     bool m_keys[DirectionCount] = { false, false, false, false };
-
-    /// Set by the clock tick, cleared once the frame has been drawn.
-    bool m_dirty = true;
 
     short int m_frame = 0;
     short int m_frameCount = 0;
