@@ -1,0 +1,24 @@
+# Build outputs
+build/
+web/dist/
+web/allegro5/
+
+# MSVC intermediates
+*.obj
+*.pdb
+*.iobj
+*.ipdb
+*.log
+*.recipe
+*.tlog/
+*FileListAbsolute.txt
+
+# Runtime state
+HighScore
+
+# IDE
+.idea/
+.vs/
+
+# Native build output
+the_invasion

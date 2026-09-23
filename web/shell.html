@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Invasion</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: #02020a; color: #6f9;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 14px; padding: 16px;
+  }
+  h1 { margin: 0; font-size: clamp(20px, 4vw, 30px); font-weight: 600; letter-spacing: .12em; color: #0f6; }
+  #frame { position: relative; width: 100%; max-width: 1280px; aspect-ratio: 16 / 9; }
+  canvas {
+    display: block; width: 100%; height: 100%; background: #000;
+    border: 1px solid #0f6a3a; border-radius: 6px; outline: none;
+  }
+  #status {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+    background: #02020a; font-size: 14px; border-radius: 6px;
+  }
+  #status[hidden] { display: none; }
+  progress { width: min(340px, 70%); height: 6px; accent-color: #0f6; }
+  #hint { font-size: 12px; color: #4a7; text-align: center; max-width: 640px; line-height: 1.6; }
+  kbd { background: #0a2a1a; border: 1px solid #0f6a3a; border-radius: 3px; padding: 1px 5px; color: #8fb; }
+</style>
+</head>
+<body>
+  <h1>THE INVASION</h1>
+  <div id="frame">
+    <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
+    <div id="status">
+      <div id="status-text">carregando…</div>
+      <progress id="bar" value="0" max="100"></progress>
+    </div>
+  </div>
+  <p id="hint">
+    <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> mover ·
+    <kbd>Espaço</kbd> atirar · <kbd>Esc</kbd> menu<br>
+    Clique no quadro para dar foco. O som só começa após a primeira tecla —
+    é a política de autoplay do navegador, não um defeito do jogo.
+  </p>
+
+<script>
+  const statusEl = document.getElementById('status');
+  const statusText = document.getElementById('status-text');
+  const bar = document.getElementById('bar');
+  const canvas = document.getElementById('canvas');
+
+  var Module = {
+    canvas: canvas,
+    print: (...a) => console.log(...a),
+    printErr: (...a) => console.error(...a),
+    setStatus: (text) => {
+      if (!text) { statusEl.hidden = true; canvas.focus(); return; }
+      statusEl.hidden = false;
+      const m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+      if (m) { statusText.textContent = m[1]; bar.value = +m[2]; bar.max = +m[4]; }
+      else { statusText.textContent = text; bar.removeAttribute('value'); }
+    },
+    onRuntimeInitialized: () => canvas.focus()
+  };
+  Module.setStatus('carregando…');
+  window.onerror = () => Module.setStatus('falhou — veja o console');
+  canvas.addEventListener('click', () => canvas.focus());
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>
